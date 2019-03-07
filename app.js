@@ -79,7 +79,7 @@ var app = new Vue({
       let request = `name=${this.selectedDay.name}`;
       this.selectedDay.routines.forEach(routine => request += `&routineIds=${routine._id}`);
 
-      fetch(`ROOT_URL/days/${this.selectedDay._id}`, {
+      fetch(`${ROOT_URL}/days/${this.selectedDay._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -105,7 +105,7 @@ var app = new Vue({
       let request = `name=${this.activeRoutine.name}`;
       this.activeRoutine.items.filter(i => i.name.replace(/\s/g,'').length > 0).forEach(item => request += `&itemNames=${item.name}`);
 
-      fetch(`ROOT_URL/routines/${this.activeRoutine._id}`, {
+      fetch(`${ROOT_URL}/routines/${this.activeRoutine._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -118,7 +118,7 @@ var app = new Vue({
       }).catch(err => alert(err));
     },
     deleteRoutine() {
-      fetch(`ROOT_URL/routines/${this.activeRoutine._id}`, { 
+      fetch(`${ROOT_URL}/routines/${this.activeRoutine._id}`, { 
         method: 'DELETE' 
       }).then(() => {
         this.getRoutines().then(() => {
@@ -128,7 +128,7 @@ var app = new Vue({
       }).catch(err => alert(err));
     },
     deleteDay() {
-      fetch(`ROOT_URL/days/${this.selectedDay._id}`, { 
+      fetch(`${ROOT_URL}/days/${this.selectedDay._id}`, { 
         method: 'DELETE' 
       }).then(() => {
         this.getDays().then(() => {
@@ -148,7 +148,7 @@ var app = new Vue({
       let request = `name=${this.activeRoutine.name}`;
       this.activeRoutine.items.forEach(item => request += `&itemNames=${item.name}`);
 
-      fetch('ROOT_URL/routines', {
+      fetch(`${ROOT_URL}/routines`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -161,10 +161,10 @@ var app = new Vue({
       }).catch(err => alert(err));
     },
     getDays() {
-      return fetch('ROOT_URL/days').then(res => res.json().then(data => this.days = data));
+      return fetch(`${ROOT_URL}/days`).then(res => res.json().then(data => this.days = data));
     },
     getRoutines(){
-      return fetch('ROOT_URL/routines').then(res => {
+      return fetch(`${ROOT_URL}/routines`).then(res => {
         return res.json().then(data => {
           console.log("ROUTINES: ", data);
           this.routines = data;
@@ -186,7 +186,7 @@ var app = new Vue({
         return;
       }
 
-      fetch('ROOT_URL/days', {
+      fetch(`${ROOT_URL}/days`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
