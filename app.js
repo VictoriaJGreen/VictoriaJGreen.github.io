@@ -3,7 +3,7 @@
 
 //var ROOT_URL = "http://localhost:8080";
 //var ROOT_URL = "https://git.heroku.com/pacific-ridge-51345.git ";
-var ROOT_URL = "https://git.heroku.com/daydesign.git";
+var ROOT_URL = "https://daydesign.herokuapp.com/";
 
 var app = new Vue({
   el: '#app',
