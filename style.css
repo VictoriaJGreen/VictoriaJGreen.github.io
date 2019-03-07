@@ -1,0 +1,207 @@
+#app {
+  background: lightgray;
+}
+
+.banner {
+  height: 10em;
+  background: #F4EBDB;
+}
+
+.banner img {
+  height: 100%;
+}
+
+.routines .card .card .card-body:hover, .days .card .card-body:hover, .greige-card:hover {
+  color: black !important;
+  background: #F4EBDB !important;
+  border-color: white !important;
+}
+
+.card .card .card-body, .days .card .card-body {
+  border: 4px solid transparent !important;
+  cursor: pointer;
+}
+
+.card .card-body {
+  padding: 15px;
+}
+
+.card-body > label {
+  margin: 0;
+}
+
+.card-body > label, .card-body > h5 {
+  display: block;
+  font-family: 'Josefin Sans', sans-serif;
+}
+
+.days .card-body > h5 {
+  margin: 0;
+}
+
+.card-body > label + p {
+  margin-top: 10px;
+}
+
+.content {
+  background: #BC9275;
+  padding: 1em;
+}
+
+.card h5.card-title  {
+  font-family: 'Josefin Sans', sans-serif;
+}
+
+.disabled * {
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.disabled > * {
+  opacity: .5;
+}
+
+.invis {
+  opacity: 0 !important;
+}
+
+.col-sm-4 button.btn-danger {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  margin: 20px 35px;
+  width: calc(100% - 70px);
+  z-index: 1;
+}
+.col-sm-4 input.form-control {
+  position: absolute;
+  margin: 10px 35px;
+  left: 0;
+  top: 0;
+  width: calc(100% - 70px);
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 20px;
+}
+
+.selected-day .card-body {
+  cursor: pointer;
+  border: 4px solid transparent;
+}
+
+.selected-day:hover .card, .selected-day:hover .card-body {
+  background: #ffffffA0;
+  border-color: #BC9275;
+}
+
+.selected-day:hover > .card > .card-body {
+  border-color: white;
+}
+
+p {
+  font-family: 'Montserrat', sans-serif;
+  text-align: left;
+}
+
+#routineModalTitle {
+  font-family: 'Josefin Sans', sans-serif;
+}
+
+.day-button {
+  background: #E4CCB3;
+  border: 4px solid transparent;
+  color: white;
+  text-decoration: none;
+  -webkit-transition-duration: 0.4s; /* Safari */
+  transition-duration: 0.4s;
+}
+
+.greige-card {
+  background: #D6CDC4 !important;
+  color: white !important;
+  text-decoration: none !important;
+  -webkit-transition-duration: 0.4s !important; /* Safari */
+  transition-duration: 0.4s !important;
+}
+
+.plan {
+  color: white;
+}
+
+.panel + .panel, .days .card {
+  margin-top: 15px;
+}
+
+.routines {
+  max-height:100%;
+}
+
+.selected-day .card .card .card-body, .routines .card .card .card-body, .days .card .card-body {
+  background: #F4EBDB;
+}
+
+.card .card .card-body p {
+  font-size: 10px;
+  margin-bottom: 5px;
+}
+
+.card + .card {
+  margin-top: 15px;
+}
+
+li {
+  list-style: none;
+  margin-top: 15px;
+}
+
+ul {
+  padding: 0;
+}
+
+.modal {
+  font-family: 'Josefin Sans', sans-serif;
+}
+
+.modal button.btn {
+  background: #D6CDC4;
+  border: none;
+  color: white;
+}
+
+.modal button.btn:hover {
+  background: #D6D4D7;
+}
+
+.modal input {
+  font-family: 'Josefin Sans', sans-serif;
+  background: #E4CCB3;
+  color: white;
+}
+
+.modal input::placeholder {
+  color: #ffffff80;
+}
+
+.modal input + input, .modal input:last-child {
+  margin-top: 10px;
+}
+
+.modal .modal-content {
+  background: #F4EBDB;
+}
+
+
+.modal .modal-header, .modal .modal-footer {
+  border: none;
+}
+
+.validation-errors li {
+  color: red;
+  margin: 0;
+  list-style: circle;
+  margin-left: 30px;
+}
+
+#routineModal .routine-title {
+  text-align: center;
+  font-weight: bold;
+}
