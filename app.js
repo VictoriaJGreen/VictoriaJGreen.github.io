@@ -2,8 +2,8 @@
 //const getRoutines = () => fetch('http://localhost:8080/routines');
 
 //var ROOT_URL = "http://localhost:8080";
-
-var ROOT_URL = "https://myapp.herokuapp.com/ ";
+//var ROOT_URL = "https://git.heroku.com/pacific-ridge-51345.git ";
+var ROOT_URL = "https://git.heroku.com/daydesign.git";
 
 var app = new Vue({
   el: '#app',
