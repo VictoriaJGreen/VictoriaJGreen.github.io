@@ -31,7 +31,7 @@ var app = new Vue({
         method: "GET",
         headers: {
           "Content-type": "application/x-www-form-urlencoded",
-          "Access-Control-Allow-Headers": "*"
+          "Access-Control-Allow-Headers": "null"
         },
         credentials: 'include'
       }).then(response => {
@@ -47,7 +47,7 @@ var app = new Vue({
         method: "POST",
         headers: {
           "Content-type": "application/x-www-form-urlencoded", 
-          "Access-Control-Allow-Headers": "*"
+          "Access-Control-Allow-Headers": "null"
         },
         credentials: 'include',
         body: data
@@ -115,7 +115,7 @@ var app = new Vue({
         method: "POST",
         headers: {
           "Content-type": "application/x-www-form-urlencoded",
-          "Access-Control-Allow-Headers": "*"
+          "Access-Control-Allow-Headers": "null"
         },
         credentials: 'include',
         body: data
@@ -190,7 +190,7 @@ var app = new Vue({
         method: 'PUT',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          "Access-Control-Allow-Headers": "*"
+          "Access-Control-Allow-Headers": "null"
         },
         credentials: 'include',
         body: request
@@ -217,7 +217,7 @@ var app = new Vue({
         method: 'PUT',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          "Access-Control-Allow-Headers": "*"
+          "Access-Control-Allow-Headers": "null"
         },
         credentials: 'include',
         body: request
@@ -263,7 +263,7 @@ var app = new Vue({
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          "Access-Control-Allow-Headers": "*"
+          "Access-Control-Allow-Headers": "null"
         },
         credentials: 'include',
         body: request
@@ -278,7 +278,7 @@ var app = new Vue({
       return fetch(`${ROOT_URL}/days`, { 
         headers: {
         "Content-type": "application/x-www-form-urlencoded",
-        "Access-Control-Allow-Headers": "*"
+        "Access-Control-Allow-Headers": "null"
       }, 
       credentials: 'include'}).then(res => res.json().then(data => this.days = data));
     },
@@ -287,7 +287,7 @@ var app = new Vue({
       return fetch(`${ROOT_URL}/routines`, { 
         headers: {
         "Content-type": "application/x-www-form-urlencoded",
-        "Access-Control-Allow-Headers": "*"
+        "Access-Control-Allow-Headers": "null"
       }, 
       credentials: 'include'}).then(res => {
         return res.json().then(data => {
@@ -317,7 +317,7 @@ var app = new Vue({
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          "Access-Control-Allow-Headers": "*"
+          "Access-Control-Allow-Headers": "null"
         },
         credentials: 'include',
         body: `name=${this.newDayName}`
