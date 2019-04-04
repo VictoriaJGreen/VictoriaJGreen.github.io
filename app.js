@@ -2,8 +2,7 @@
 //const getRoutines = () => fetch('http://localhost:8080/routines');
 
 //var ROOT_URL = "http://localhost:8080";
-//var ROOT_URL = "https://git.heroku.com/pacific-ridge-51345.git ";
-var ROOT_URL = 'https://daydesign.herokuapp.com';
+ var ROOT_URL = 'https://daydesign.herokuapp.com';
 
 var app = new Vue({
   el: '#app',
@@ -16,9 +15,107 @@ var app = new Vue({
     activeRoutine: null, 
     activeRoutineItem: "",
     newDayName: "",
-    errors: []
+    errors: [],
+    firstName: "",
+    lastName: "",
+    email: "",
+    plainPassword: "",
+    existingEmail: "",
+    existingPlainPassword: "",
+    user: null
   },
   methods: {
+    logout(e){
+      e.preventDefault();
+      return fetch(`${ROOT_URL}/logout`, {
+        method: "GET",
+        credentials: 'include'
+      }).then(response => {
+        if (response.status == 200) {
+          this.user = null;
+        }
+      })
+    },
+    login(e){
+      e.preventDefault();
+      let data = `email=${this.existingEmail}&plainPassword=${this.existingPlainPassword}`;
+      return fetch(`${ROOT_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/x-www-form-urlencoded"
+        },
+        credentials: 'include',
+        body: data
+      }).then(response => {
+        if (response.status == 200) {
+          response.json().then(user => {
+            //don't select day until I have all my days and all my routines
+            //selected day routine ids need to be matched to their routine obj.
+            this.user = user;
+            this.loadUserData().then(() => {
+              if(this.days.length > 0) {
+                this.selectDay(this.days[0]);
+              }
+            });
+          });
+        }
+      })
+    },
+    
+
+    registerUser(e) {
+      e.preventDefault();
+      // validate the data first
+      // this.validateUser();
+      if (this.errors.length > 0) {
+        return;
+      }
+
+      this.createUser({
+        firstName: this.firstName,
+        lastName: this.lastName,
+        email: this.email,
+        plainPassword: this.plainPassword
+      }).then(response => {
+        if (response.status == 201) {
+          console.log("User created.");
+          console.log(response);
+          response.json().then(user => {
+            this.user = user;
+          }).then(() => {
+            this.existingEmail = this.email;
+            this.existingPlainPassword = this.plainPassword;
+            this.login(e);
+          });
+        } else if (response.status == 422) {
+          response.json().then(function(errors) {
+            alert("This email is already registered.");
+          });
+        } else {
+          alert("Bad things have happened. Probably give up.");
+        }
+      }, err => {
+        alert(err);
+      });
+    },
+
+    createUser(user) {
+      let data = `firstName=${encodeURIComponent(user.firstName)}`;
+      data += `&lastName=${encodeURIComponent(user.lastName)}`;
+      data += `&email=${encodeURIComponent(user.email)}`;
+      data += `&plainPassword=${encodeURIComponent(user.plainPassword)}`;
+
+      console.log(data);
+      return fetch(`${ROOT_URL}/users`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/x-www-form-urlencoded"
+        },
+        credentials: 'include',
+        body: data
+      })
+    },
+
     isValidRoutine() {
       this.errors = [];
       if (!this.activeRoutine) { // Cant create if object is missing exists
@@ -35,6 +132,7 @@ var app = new Vue({
       }
       return this.errors.length == 0;
     },
+
     selectDay(day){
       let selectedDayRoutines = []; // information that goes with first day
 
@@ -53,10 +151,12 @@ var app = new Vue({
         isBeingEdited: false
       };
     },
+
     editSelectedDay() {
       this.selectedDay.isBeingEdited = true;
       this.routines = this.routines.filter(r => this.selectedDay.routines.every(sdr => sdr._id != r._id));
     },
+
     initActiveRoutine(routine) {
       this.errors = [];
       if (this.selectedDay.isBeingEdited) {
@@ -75,24 +175,25 @@ var app = new Vue({
         };
       }
     },
+
     updateDay() {
       let request = `name=${this.selectedDay.name}`;
       this.selectedDay.routines.forEach(routine => request += `&routineIds=${routine._id}`);
 
-      fetch(`${ROOT_URL}/days/${this.selectedDay._id}`, {
+      return fetch(`${ROOT_URL}/days/${this.selectedDay._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
+        credentials: 'include',
         body: request
       }).then(() => {
-        this.getDays().then(() => {
-          this.getRoutines().then(() => {
-            this.selectedDay.isBeingEdited = false;
-          });
-        })
+        this.loadUserData().then(() => {
+          this.selectedDay.isBeingEdited = false;
+        });
       }).catch(err => alert(err));
     },
+
     updateRoutine() {
       if (!this.isValidRoutine()) {
         return;
@@ -105,11 +206,12 @@ var app = new Vue({
       let request = `name=${this.activeRoutine.name}`;
       this.activeRoutine.items.filter(i => i.name.replace(/\s/g,'').length > 0).forEach(item => request += `&itemNames=${item.name}`);
 
-      fetch(`${ROOT_URL}/routines/${this.activeRoutine._id}`, {
+      return fetch(`${ROOT_URL}/routines/${this.activeRoutine._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
+        credentials: 'include',
         body: request
       }).then(() => {
         this.activeRoutine = null;
@@ -117,8 +219,9 @@ var app = new Vue({
         this.getRoutines();
       }).catch(err => alert(err));
     },
+
     deleteRoutine() {
-      fetch(`${ROOT_URL}/routines/${this.activeRoutine._id}`, { 
+      return fetch(`${ROOT_URL}/routines/${this.activeRoutine._id}`, { 
         method: 'DELETE' 
       }).then(() => {
         this.getRoutines().then(() => {
@@ -127,19 +230,19 @@ var app = new Vue({
         })
       }).catch(err => alert(err));
     },
+
     deleteDay() {
-      fetch(`${ROOT_URL}/days/${this.selectedDay._id}`, { 
-        method: 'DELETE' 
+      return fetch(`${ROOT_URL}/day/${this.selectedDay._id}`, { 
+        method: 'DELETE'
       }).then(() => {
-        this.getDays().then(() => {
-          this.getRoutines().then(() => {
-            if(this.days.length > 0) {
-              this.selectDay(this.days[0]);
-            }
-          });
+        this.loadUserData().then(() => {
+          if(this.days.length > 0) {
+            this.selectDay(this.days[0]);
+          }
         });
       }).catch(err => alert(err));
     },
+
     createNewRoutine() {
       if (!this.isValidRoutine()) {
         return;
@@ -148,11 +251,12 @@ var app = new Vue({
       let request = `name=${this.activeRoutine.name}`;
       this.activeRoutine.items.forEach(item => request += `&itemNames=${item.name}`);
 
-      fetch(`${ROOT_URL}/routines`, {
+      return fetch(`${ROOT_URL}/routines`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
+        credentials: 'include',
         body: request
       }).then(() => {
         $('#routineModal').modal('hide'); // Just used to hide bootstrap modal
@@ -160,17 +264,20 @@ var app = new Vue({
         this.getRoutines();
       }).catch(err => alert(err));
     },
+
     getDays() {
-      return fetch(`${ROOT_URL}/days`).then(res => res.json().then(data => this.days = data));
+      return fetch(`${ROOT_URL}/days`, {credentials: 'include'}).then(res => res.json().then(data => this.days = data));
     },
+
     getRoutines(){
-      return fetch(`${ROOT_URL}/routines`).then(res => {
+      return fetch(`${ROOT_URL}/routines`, {credentials: 'include'}).then(res => {
         return res.json().then(data => {
           console.log("ROUTINES: ", data);
           this.routines = data;
         })
       })
     },
+
     createNewRoutineItem() {
       if (this.activeRoutineItem && this.activeRoutineItem.replace(/\s/g,'').length == 0) {
         this.errors = ['missing routine item name >:{'];
@@ -180,35 +287,35 @@ var app = new Vue({
       this.activeRoutine.items.push({ name: this.activeRoutineItem }); // need to create a NEW ITEM OBJECT with a name: activeRoutineItem
       this.activeRoutineItem = "";
     },
+
     createNewDay() {
       if (!this.newDayName || this.newDayName.replace(/\s/g,'').length == 0) {
         this.errors.push('missing new day name');
         return;
       }
 
-      fetch(`${ROOT_URL}/days`, {
+      return fetch(`${ROOT_URL}/days`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
+        credentials: 'include',
         body: `name=${this.newDayName}`
       }).then(() => {
         $('#newDayModal').modal('hide'); // Just used to hide bootstrap modal
         this.newDayName = "";
         this.getDays();
       }).catch(err => alert(err));
-    }
-  },
-  created() {
-    console.log("VUE is ready");
-    //don't select day until I have all my days and all my routines
-    //selected day routine ids need to be matched to their routine obj.
-    this.getDays().then(() => {
-      this.getRoutines().then(() => {
-        if(this.days.length > 0) {
-          this.selectDay(this.days[0]);
-        }
+    },
+
+    loadUserData() {
+      return this.getDays().then(() => {
+         return this.getRoutines();
       });
-    });
+    },
+
+    created() {
+      console.log("VUE is ready");
+    }
   }
 });

@@ -13,9 +13,25 @@
     <div class="container">
       <div class="banner d-block text-center p-3">
         <img :src="logo" />
+        <button v-if="user" class="btn btn-light float-right" @click="logout">Logout!</button>
       </div>
       <div class="content">
-        <div class="row">
+        <div v-if="!user" class="registration-form mx-auto mt-3">
+          <form class="form-group" @submit="login">
+              <input v-model="existingEmail" type="email" class="form-control" placeholder="Email Address" required/>
+              <input v-model="existingPlainPassword" type="password" class="form-control" placeholder="Password" required/>
+              <button class="btn btn-secondary btn-block" type="submit">Login</button>
+          </form>
+          <form class="form-group" @submit="registerUser">
+              <input v-model="firstName" type="string" class="form-control" placeholder="First Name" required/>
+              <input v-model="lastName" type="string" class="form-control" placeholder="Last Name" required/>
+              <input v-model="email" type="email" class="form-control" placeholder="Email Address" required/>
+              <input v-model="plainPassword" type="password" class="form-control" placeholder="Password" required/>
+              <button class="btn btn-secondary btn-block" type="submit">Register</button>
+          </form>
+        </div>
+
+        <div v-else class="row">
           <div class="col-sm-4">
             <input v-if="selectedDay && selectedDay.isBeingEdited" @blur="updateDay()" class="form-control text-center card-title font-weight-bold" type="text" v-model="selectedDay.name" />
             <button v-if="selectedDay && selectedDay.isBeingEdited" class="btn btn-danger btn-block" @click="deleteDay()">Delete</button>
