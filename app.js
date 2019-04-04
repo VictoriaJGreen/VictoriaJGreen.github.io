@@ -29,6 +29,9 @@ var app = new Vue({
       e.preventDefault();
       return fetch(`${ROOT_URL}/logout`, {
         method: "GET",
+        headers: {
+          "Content-type": "application/x-www-form-urlencoded"
+        },
         credentials: 'include'
       }).then(response => {
         if (response.status == 200) {
@@ -266,11 +269,15 @@ var app = new Vue({
     },
 
     getDays() {
-      return fetch(`${ROOT_URL}/days`, {credentials: 'include'}).then(res => res.json().then(data => this.days = data));
+      return fetch(`${ROOT_URL}/days`, { headers: {
+        "Content-type": "application/x-www-form-urlencoded"
+      }, credentials: 'include'}).then(res => res.json().then(data => this.days = data));
     },
 
     getRoutines(){
-      return fetch(`${ROOT_URL}/routines`, {credentials: 'include'}).then(res => {
+      return fetch(`${ROOT_URL}/routines`, { headers: {
+        "Content-type": "application/x-www-form-urlencoded"
+      }, credentials: 'include'}).then(res => {
         return res.json().then(data => {
           console.log("ROUTINES: ", data);
           this.routines = data;
