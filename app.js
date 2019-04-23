@@ -1,4 +1,4 @@
-const socket = new WebSocket('ws://websockethangman.herokuapp.com/');
+const socket = new WebSocket('wss://websockethangman.herokuapp.com/');
 
 // socket.onmessage = function (event) {
 //   var received = event.data;
