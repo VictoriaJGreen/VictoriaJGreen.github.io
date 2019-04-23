@@ -39,31 +39,35 @@ var app = new Vue({
         if (data.activeLetters.firstLetter != null && this.letterOne == null) {
           this.letterOne = data.activeLetters.firstLetter;
           guessedCorrectly = true;
+          this.correctGuessCount = this.correctGuessCount + 1;
         }
         if (data.activeLetters.secondLetter != null && this.letterTwo == null) {
           this.letterTwo = data.activeLetters.secondLetter;
           guessedCorrectly = true;
+          this.correctGuessCount = this.correctGuessCount + 1;
         }
         if (data.activeLetters.thirdLetter != null && this.letterThree == null) {
           this.letterThree = data.activeLetters.thirdLetter;
           guessedCorrectly = true;
+          this.correctGuessCount = this.correctGuessCount + 1;
         }
         if (data.activeLetters.fourthLetter != null && this.letterFour == null) {
           this.letterFour = data.activeLetters.fourthLetter;
           guessedCorrectly = true;
+          this.correctGuessCount = this.correctGuessCount + 1;
         }
         if (data.activeLetters.fifthLetter != null && this.letterFive == null) {
           this.letterFive = data.activeLetters.fifthLetter;
           guessedCorrectly = true;
+          this.correctGuessCount = this.correctGuessCount + 1;
         }
         if (data.activeLetters.sixthLetter != null && this.letterSix == null) {
           this.letterSix = data.activeLetters.sixthLetter;
           guessedCorrectly = true;
+          this.correctGuessCount = this.correctGuessCount + 1;
         }
 
-        if (guessedCorrectly) {
-          this.correctGuessCount = this.correctGuessCount + 1;
-        } else {
+        if (!guessedCorrectly) {
           this.turns = this.turns - 1;
         }
 
