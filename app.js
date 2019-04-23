@@ -155,7 +155,6 @@ var app = new Vue({
       this.guess = null;
       this.announcedGuess = null;
       this.magicWord = null;
-      socket = null;
     }
   }
 });
