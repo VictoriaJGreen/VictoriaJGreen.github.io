@@ -1,341 +1,140 @@
-//const getDays = () => fetch('http://localhost:8080/days');
-//const getRoutines = () => fetch('http://localhost:8080/routines');
+const socket = new WebSocket('ws://localhost:8080');
 
-//var ROOT_URL = "http://localhost:8080";
- var ROOT_URL = 'https://daydesign.herokuapp.com';
+// socket.onmessage = function (event) {
+//   var received = event.data;
+//   var data = JSON.parse(received);
+//   console.log("data received from server", data);
+//   addMessage(data.message);
+// };
 
 var app = new Vue({
   el: '#app',
   data: {
-    logo: './img/logodaydesign.png',
-    days: [],
-    selectedDay: null,
-    activeDay: null,
-    routines: [],
-    activeRoutine: null, 
-    activeRoutineItem: "",
-    newDayName: "",
-    errors: [],
-    firstName: "",
-    lastName: "",
-    email: "",
-    plainPassword: "",
-    existingEmail: "",
-    existingPlainPassword: "",
-    user: null
+    gallows: './images/gallows.png',
+    headLeft: './images/headLeft.png',
+    headRight: './images/headRight.png',
+    handLeft: './images/handLeft.png',
+    handRight: './images/handRight.png',
+    legLeft: './images/legLeft.png',
+    legRight: './images/legRight.png',
+    letterOne: null,
+    letterTwo: null,
+    letterThree: null,
+    letterFour: null,
+    letterFive: null,
+    letterSix: null,
+    turns: 6, 
+    assignedPlayer: null,
+    playerOnesTurn: true, 
+    guess: null,
+    magicWord: null,
+    announcedGuess: null,
+    correctGuessCount: 0
   },
   methods: {
-    logout(e){
-      e.preventDefault();
-      return fetch(`${ROOT_URL}/logout`, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/x-www-form-urlencoded",
-          "Access-Control-Allow-Origin": "https://victoriajgreen.github.io"
-        },
-        credentials: 'include'
-      }).then(response => {
-        if (response.status == 200) {
-          this.user = null;
-        }
-      })
-    },
-    login(e){
-      e.preventDefault();
-      let data = `email=${this.existingEmail}&plainPassword=${this.existingPlainPassword}`;
-      return fetch(`${ROOT_URL}/login`, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/x-www-form-urlencoded", 
-          "Access-Control-Allow-Origin": "https://victoriajgreen.github.io"
-        },
-        credentials: 'include',
-        body: data
-      }).then(response => {
-        if (response.status == 200) {
-          response.json().then(user => {
-            //don't select day until I have all my days and all my routines
-            //selected day routine ids need to be matched to their routine obj.
-            this.user = user;
-            this.loadUserData().then(() => {
-              if(this.days.length > 0) {
-                this.selectDay(this.days[0]);
-              }
-            });
-          });
-        }
-      })
-    },
-    
+      updateWord(data) {
+        console.log("active letters", data.activeLetters);
+        let guessedCorrectly = false;
 
-    registerUser(e) {
-      e.preventDefault();
-      // validate the data first
-      // this.validateUser();
-      if (this.errors.length > 0) {
-        return;
-      }
+        if (data.activeLetters.firstLetter != null && this.letterOne == null) {
+          this.letterOne = data.activeLetters.firstLetter;
+          guessedCorrectly = true;
+        }
+        if (data.activeLetters.secondLetter != null && this.letterTwo == null) {
+          this.letterTwo = data.activeLetters.secondLetter;
+          guessedCorrectly = true;
+        }
+        if (data.activeLetters.thirdLetter != null && this.letterThree == null) {
+          this.letterThree = data.activeLetters.thirdLetter;
+          guessedCorrectly = true;
+        }
+        if (data.activeLetters.fourthLetter != null && this.letterFour == null) {
+          this.letterFour = data.activeLetters.fourthLetter;
+          guessedCorrectly = true;
+        }
+        if (data.activeLetters.fifthLetter != null && this.letterFive == null) {
+          this.letterFive = data.activeLetters.fifthLetter;
+          guessedCorrectly = true;
+        }
+        if (data.activeLetters.sixthLetter != null && this.letterSix == null) {
+          this.letterSix = data.activeLetters.sixthLetter;
+          guessedCorrectly = true;
+        }
 
-      this.createUser({
-        firstName: this.firstName,
-        lastName: this.lastName,
-        email: this.email,
-        plainPassword: this.plainPassword
-      }).then(response => {
-        if (response.status == 201) {
-          console.log("User created.");
-          console.log(response);
-          response.json().then(user => {
-            this.user = user;
-          }).then(() => {
-            this.existingEmail = this.email;
-            this.existingPlainPassword = this.plainPassword;
-            this.login(e);
-          });
-        } else if (response.status == 422) {
-          response.json().then(function(errors) {
-            alert("This email is already registered.");
-          });
+        if (guessedCorrectly) {
+          this.correctGuessCount = this.correctGuessCount + 1;
         } else {
-          alert("Bad things have happened. Probably give up.");
+          this.turns = this.turns - 1;
         }
-      }, err => {
-        alert(err);
-      });
-    },
 
-    createUser(user) {
-      let data = `firstName=${encodeURIComponent(user.firstName)}`;
-      data += `&lastName=${encodeURIComponent(user.lastName)}`;
-      data += `&email=${encodeURIComponent(user.email)}`;
-      data += `&plainPassword=${encodeURIComponent(user.plainPassword)}`;
+        let imPlayerOneAndITookMyTurn = this.assignedPlayer == "playerOne" && this.playerOnesTurn;
+        let imPlayerTwoAndItookMyTurn = this.assignedPlayer == "playerTwo" && !this.playerOnesTurn;
+        if (imPlayerOneAndITookMyTurn || imPlayerTwoAndItookMyTurn) {
+          this.guess = null;
+        }
 
-      console.log(data);
-      return fetch(`${ROOT_URL}/users`, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/x-www-form-urlencoded",
-          "Access-Control-Allow-Origin": "https://victoriajgreen.github.io"
-        },
-        credentials: 'include',
-        body: data
-      })
-    },
+        this.playerOnesTurn = !this.playerOnesTurn;
+      },
+      guessLetter() {
+        if (this.assignedPlayer == "playerOne" && this.playerOnesTurn == true){
+          var letterData = {
+            type: "letterGuess",
+            letter: this.guess
+            // guesser: this.assignedPlayer
+          };
 
-    isValidRoutine() {
-      this.errors = [];
-      if (!this.activeRoutine) { // Cant create if object is missing exists
-        this.errors.push('bad routine! >:{');
-      }
-      if (this.activeRoutineItem && this.activeRoutineItem.replace(/\s/g,'').length > 0) {
-        this.errors.push('add new routine item before trying to save routine! >:{');
-      }
-      if (!this.activeRoutine.name || this.activeRoutine.name.replace(/\s/g,'').length == 0) { // Cant create if name is just white space
-        this.errors.push('missing routine name! >:{');
-      }
-      if (!this.activeRoutine.items) {
-        this.errors.push('routine items can be empty, but NOT NULL! >:{');
-      }
-      return this.errors.length == 0;
-    },
+          socket.send(JSON.stringify(letterData));
+        } else if (this.assignedPlayer == "playerTwo" && this.playerOnesTurn == false){
+          var letterData = {
+            type: "letterGuess",
+            letter: this.guess
+            // guesser: this.assignedPlayer
+          };
 
-    selectDay(day){
-      let selectedDayRoutines = []; // information that goes with first day
-
-      day.routineIds.forEach(selectedDayRoutineId => {
-        this.routines.forEach(routine => {
-          if (routine._id == selectedDayRoutineId) { 
-            selectedDayRoutines.push(routine);
-          }
-        })
-      });
-
-      this.selectedDay = {
-        _id: day._id,
-        name: day.name,
-        routines: selectedDayRoutines,
-        isBeingEdited: false
-      };
-    },
-
-    editSelectedDay() {
-      this.selectedDay.isBeingEdited = true;
-      this.routines = this.routines.filter(r => this.selectedDay.routines.every(sdr => sdr._id != r._id));
-    },
-
-    initActiveRoutine(routine) {
-      this.errors = [];
-      if (this.selectedDay.isBeingEdited) {
-        if (routine) {
-          this.selectedDay.routines.push(routine);
-          this.updateDay();
+          socket.send(JSON.stringify(letterData));
         } else {
-          this.selectedDay.isBeingEdited = false;
-          this.getRoutines();
+          alert("It is currently the other player's turn. Please wait.")
         }
-      } else {
-        this.activeRoutine = routine || { // js truthiness; pick first IF NOT NULL
-          _id: null,
-          name: "",
-          items: []
-        };
       }
     },
+  created() {
+    console.log("VUE is ready");
+    socket.onmessage = function (event) {
+      var received = event.data;
+      var data = JSON.parse(received);
+      console.log("data received from server", data);
+      addMessage(data.message);
+    };
 
-    updateDay() {
-      let request = `name=${this.selectedDay.name}`;
-      this.selectedDay.routines.forEach(routine => request += `&routineIds=${routine._id}`);
+    socket.onmessage = e => {
+      console.log('Received: ', e.data);
+      const data = JSON.parse(e.data);
+      console.log("data", data)
 
-      return fetch(`${ROOT_URL}/days/${this.selectedDay._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          "Access-Control-Allow-Origin": "https://victoriajgreen.github.io"
-        },
-        credentials: 'include',
-        body: request
-      }).then(() => {
-        this.loadUserData().then(() => {
-          this.selectedDay.isBeingEdited = false;
-        });
-      }).catch(err => alert(err));
-    },
+      console.log("type", data.type)
+      if (data.type == "player"){
+        this.assignedPlayer = data.player;
+        console.log("I am player ", this.assignedPlayer)
 
-    updateRoutine() {
-      if (!this.isValidRoutine()) {
-        return;
+      } else if (data.type == "magicWord") {
+        this.magicWord = data.magicWord
+        console.log("The magic word is ", this.magicWord)
+        //this.loadMagicWord();
+      } else if (data.type == "letterGuess") {
+        this.announcedGuess = data.letter;
+      } else if (data.type == "activeWord") {
+        this.updateWord(data);
+      } else if (data.type == "activePlayer"){
+        if (data.activePlayer.activePlayer == playerOne){
+          this.playerOnesTurn = false;
+        } else if (data.activePlayer.activePlayer == playerTwo){
+          this.playerOnesTurn = true;
+        }
       }
-      if (!this.activeRoutine._id) { // Cant create if already exists
-        this.errors.push('cant\'t update routine, it doesnt have an id! >:{');
-        return;
-      }
+    }
 
-      let request = `name=${this.activeRoutine.name}`;
-      this.activeRoutine.items.filter(i => i.name.replace(/\s/g,'').length > 0).forEach(item => request += `&itemNames=${item.name}`);
-
-      return fetch(`${ROOT_URL}/routines/${this.activeRoutine._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          "Access-Control-Allow-Origin": "https://victoriajgreen.github.io"
-        },
-        credentials: 'include',
-        body: request
-      }).then(() => {
-        this.activeRoutine = null;
-        $('#routineModal').modal('hide'); // Just used to hide bootstrap modal
-        this.getRoutines();
-      }).catch(err => alert(err));
-    },
-
-    deleteRoutine() {
-      return fetch(`${ROOT_URL}/routines/${this.activeRoutine._id}`, { 
-        method: 'DELETE' 
-      }).then(() => {
-        this.getRoutines().then(() => {
-          $('#routineModal').modal('hide');
-          this.activeRoutine = null;
-        })
-      }).catch(err => alert(err));
-    },
-
-    deleteDay() {
-      return fetch(`${ROOT_URL}/day/${this.selectedDay._id}`, { 
-        method: 'DELETE'
-      }).then(() => {
-        this.loadUserData().then(() => {
-          if(this.days.length > 0) {
-            this.selectDay(this.days[0]);
-          }
-        });
-      }).catch(err => alert(err));
-    },
-
-    createNewRoutine() {
-      if (!this.isValidRoutine()) {
-        return;
-      }
-
-      let request = `name=${this.activeRoutine.name}`;
-      this.activeRoutine.items.forEach(item => request += `&itemNames=${item.name}`);
-
-      return fetch(`${ROOT_URL}/routines`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          "Access-Control-Allow-Origin": "https://victoriajgreen.github.io"
-        },
-        credentials: 'include',
-        body: request
-      }).then(() => {
-        $('#routineModal').modal('hide'); // Just used to hide bootstrap modal
-        this.activeRoutine = null;
-        this.getRoutines();
-      }).catch(err => alert(err));
-    },
-
-    getDays() {
-      return fetch(`${ROOT_URL}/days`, { 
-        headers: {
-        "Content-type": "application/x-www-form-urlencoded",
-        "Access-Control-Allow-Origin": "https://victoriajgreen.github.io"
-      }, 
-      credentials: 'include'}).then(res => res.json().then(data => this.days = data));
-    },
-
-    getRoutines(){
-      return fetch(`${ROOT_URL}/routines`, { 
-        headers: {
-        "Content-type": "application/x-www-form-urlencoded",
-        "Access-Control-Allow-Origin": "https://victoriajgreen.github.io"
-      }, 
-      credentials: 'include'}).then(res => {
-        return res.json().then(data => {
-          console.log("ROUTINES: ", data);
-          this.routines = data;
-        })
-      })
-    },
-
-    createNewRoutineItem() {
-      if (this.activeRoutineItem && this.activeRoutineItem.replace(/\s/g,'').length == 0) {
-        this.errors = ['missing routine item name >:{'];
-        return;
-      } 
-      
-      this.activeRoutine.items.push({ name: this.activeRoutineItem }); // need to create a NEW ITEM OBJECT with a name: activeRoutineItem
-      this.activeRoutineItem = "";
-    },
-
-    createNewDay() {
-      if (!this.newDayName || this.newDayName.replace(/\s/g,'').length == 0) {
-        this.errors.push('missing new day name');
-        return;
-      }
-
-      return fetch(`${ROOT_URL}/days`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          "Access-Control-Allow-Origin": "https://victoriajgreen.github.io"
-        },
-        credentials: 'include',
-        body: `name=${this.newDayName}`
-      }).then(() => {
-        $('#newDayModal').modal('hide'); // Just used to hide bootstrap modal
-        this.newDayName = "";
-        this.getDays();
-      }).catch(err => alert(err));
-    },
-
-    loadUserData() {
-      return this.getDays().then(() => {
-         return this.getRoutines();
-      });
-    },
-
-    created() {
-      console.log("VUE is ready");
+    socket.onclose = e => {
+      console.log('Closing socket due to: ', e.reason);
     }
   }
 });

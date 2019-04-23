@@ -1,196 +1,86 @@
 <!DOCTYPE html>
+  <head>
+    <title>Hello World!</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous">
+  </head>
+  <body>
+    <div id="app">
+        <div class="container">
+          <div class="row">
+              <div class="col-8"><h1>Hangman</h1></div>
+              <div class="col-4"><h2>{{ turns }} Turns Left</h2></div>
+          </div>
 
-<head>
-  <title>Hello World!</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-    crossorigin="anonymous">
-  <link href="https://fonts.googleapis.com/css?family=Josefin+Sans|Montserrat" rel="stylesheet">
-</head>
+          <div class="content text-center">
+            <div class="gallows m-auto">
+              <img id="gallows-bg" :src="gallows" />
 
-<body>
-  <div id="app">
-    <div class="container">
-      <div class="banner d-block text-center p-3">
-        <img :src="logo" />
-        <button v-if="user" class="btn btn-light float-right" @click="logout">Logout!</button>
-      </div>
-      <div class="content">
-        <div v-if="!user" class="registration-form mx-auto mt-3">
-          <form class="form-group" @submit="login">
-              <input v-model="existingEmail" type="email" class="form-control" placeholder="Email Address" required/>
-              <input v-model="existingPlainPassword" type="password" class="form-control" placeholder="Password" required/>
-              <button class="btn btn-secondary btn-block" type="submit">Login</button>
-          </form>
-          <form class="form-group" @submit="registerUser">
-              <input v-model="firstName" type="string" class="form-control" placeholder="First Name" required/>
-              <input v-model="lastName" type="string" class="form-control" placeholder="Last Name" required/>
-              <input v-model="email" type="email" class="form-control" placeholder="Email Address" required/>
-              <input v-model="plainPassword" type="password" class="form-control" placeholder="Password" required/>
-              <button class="btn btn-secondary btn-block" type="submit">Register</button>
-          </form>
-        </div>
-
-        <div v-else class="row">
-          <div class="col-sm-4">
-            <input v-if="selectedDay && selectedDay.isBeingEdited" @blur="updateDay()" class="form-control text-center card-title font-weight-bold" type="text" v-model="selectedDay.name" />
-            <button v-if="selectedDay && selectedDay.isBeingEdited" class="btn btn-danger btn-block" @click="deleteDay()">Delete</button>
-            <div class="h-100" :class="{ 'disabled': selectedDay && selectedDay.isBeingEdited }">
-              <div class="panel h-100 selected-day">
-                <div class="card h-100">
-                  <div class="card-body" v-if="selectedDay" @click="editSelectedDay()">
-                    <h5 :class="{'invis': selectedDay && selectedDay.isBeingEdited}" class="card-title text-center font-weight-bold">{{ selectedDay.name }}</h5>
-                    <div class="card" v-for="routine in selectedDay.routines">
-                      <div class="card-body">
-                        <label class="font-weight-bold text-center">{{ routine.name }}</label>
-                        <p v-for="item in routine.items">{{ item.name }}</p>
-                      </div>
-                    </div>
-                  </div>
+              <div class="hanged-man">
+                <div class="row">
+                    <div class="col-6" v-if="turns > 5"></div>
+                    <div class="col-6" v-else><img :src="headLeft"></div>
+                    <div class="col-6" v-if="turns > 4"></div>
+                    <div class="col-6" v-else><img :src="headRight"></div>
+                </div>
+                <div class="row">
+                    <div class="col-6" v-if="turns > 3"></div>
+                    <div class="col-6" v-else><img :src="handLeft"></div>
+                    <div class="col-6" v-if="turns > 2"></div>
+                    <div class="col-6" v-else><img :src="handRight"></div>
+                </div>
+                <div class="row">
+                    <div class="col-6" v-if="turns > 1"></div>
+                    <div class="col-6" v-else><img :src="legLeft"></div>
+                    <div class="col-6" v-if="turns > 0"></div>
+                    <div class="col-6" v-else><img :src="legRight"></div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="col-sm-8">
-            <div class="panel routines">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title text-center font-weight-bold">Routines</h5>
-                  <div class="row">
-                    <div class="col-6">
-                      <div class="card" v-for="(routine, index) in routines" v-if="index == 0 || index % 2 == 1">
-                          <div class="card-body" data-toggle="modal" data-target="#routineModal" @click="initActiveRoutine(routine)">
-                            <label class="font-weight-bold text-center">{{ routine.name }}</label>
-                            <p v-for="item in routine.items">{{ item.name }}</p>
-                          </div>
-                      </div>
-                    </div>
-                    <div class="col-6">
-                      <div class="card">
-                        <button class="card-body greige-card" data-toggle="modal" data-target="#routineModal" @click="initActiveRoutine()">
-                          <h5 class="text-center m-0">{{ selectedDay && !selectedDay.isBeingEdited ? 'Create New Routine' : 'Cancel' }}</h5>
-                        </button>
-                      </div>
-                      <div class="card" v-for="(routine, index) in routines" v-if="index != 0 && index % 2 == 0">
-                        <div class="card-body" data-toggle="modal" data-target="#routineModal" @click="initActiveRoutine(routine)">
-                          <label class="font-weight-bold text-center">{{ routine.name }}</label>
-                          <p v-for="item in routine.items">{{ item.name }}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="panel days" :class="[selectedDay && selectedDay.isBeingEdited ? 'disabled' : '']">
-              <div class="row h-100">
-                <div class="col-6">
-                    <div class="card" v-for="(day, index) in days" v-if="index == 0 || index % 2 == 1" :class="{disabled: selectedDay && day && day._id == selectedDay._id}">
-                      <div class="card-body" @click="selectDay(day)">
-                        <h5 class="text-center">{{ day.name }}</h5>
-                      </div>
-                    </div>
-                </div>
-                <div class="col-6">
-                  <div class="card">
-                    <button class="card-body greige-card" data-toggle="modal" data-target="#newDayModal" @click="errors = []">
-                      <h5 class="text-center m-0">Create New Day</h5>
-                    </button>
-                  </div>
-                  <div class="card" v-for="(day, index) in days" v-if="index != 0 && index % 2 == 0" :class="{disabled: selectedDay && day && day._id == selectedDay._id}">
-                    <div class="card-body" @click="selectDay(day)">
-                      <h5 class="text-center">{{ day.name }}</h5>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- New Day Modal -->
-    <div class="modal fade" id="newDayModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
-      aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header row">
-            <div class="col-1"></div>
-            <div class="col-9 text-center">
-              <h5 class="modal-title font-weight-bold">New Day</h5>
-            </div>
-            <button type="button" class="close col-2" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
+            <div class="row space"><div class="col-12"></div></div>
             <div class="row">
-              <div class="col-1"></div>
-              <div class="col-9">
-                <ul v-if="errors && errors.length > 0" class="validation-errors">
-                  <li v-for="error in errors">{{ error }}</li>
-                </ul>
-                <input type="text" placeholder="New day name..." v-model="newDayName" class="form-control" />
-              </div>
+                <!-- <div class="col-4" v-if="assignedPlayer == playerOne">You are Player One.</div>
+                <div class="col-4" v-else>You are Player Two.</div> -->
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" @click="createNewDay()">Create</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Routine Modal -->
-    <div v-if="activeRoutine" class="modal fade" id="routineModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
-      aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header row">
-            <div class="col-1"></div>
-            <div class="col-9 text-center">
-              <h5 class="modal-title font-weight-bold" id="routineModalTitle">Routine Editor</h5>
-            </div>
-            <button type="button" class="close col-2" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
             <div class="row">
-              <div class="col-1"></div>
-              <div class="col-9">
-                <ul v-if="errors && errors.length > 0" class="validation-errors">
-                  <li v-for="error in errors">{{ error }}</li>
-                </ul>
-                <input type="text" placeholder="New routine title..." v-model="activeRoutine.name" class="form-control routine-title">
-                <br />
-                <input type="text" v-for="item in activeRoutine.items" v-model="item.name" class="form-control">
-                <input type="text" placeholder="New list item..." @keyup.enter="createNewRoutineItem()" v-model="activeRoutineItem"
-                  class="form-control">
-              </div>
+                <div class="col-4" v-if="playerOnesTurn == true">Player One's Turn</div>
+                <div class="col-4" v-else>Player Two's Turn</div>
+                <div class="row space"><div class="col-12"></div></div>
+                <div class="col-8"></div>
+            </div>
+
+            <div class="row magicWord">
+                <div class="col-2"><p>{{ letterOne }}</p></div>
+                <div class="col-2"><p>{{ letterTwo }}</p></div>
+                <div class="col-2"><p>{{ letterThree }}</p></div>
+                <div class="col-2"><p>{{ letterFour }}</p></div>
+                <div class="col-2"><p>{{ letterFive }}</p></div>
+                <div class="col-2"><p>{{ letterSix }}</p></div>
+            </div>
+            <div class="row space"><div class="col-12"></div></div>
+            <div class="row">
+                <div class="col-4">
+                  <h3 v-if="turns == 0" class="text-danger">GAME OVER!</h3>
+                  <h3 v-if="correctGuessCount == 6" class="text-success">YOU WON!</h3>
+                </div>
+                <div class="col-4"><p>Most recent guess: {{ announcedGuess }}</p></div>
+                <div class="col-2"><input type="text" class="letter" maxlength="1" name="letter" v-model="guess"></div>
+                <div class="col-2">
+                    <button @click="guessLetter()">Guess</button>
+                </div>
             </div>
           </div>
-          <div class="modal-footer" v-if="activeRoutine">
-            <div v-if="activeRoutine && activeRoutine._id">
-              <button type="button" class="btn btn-secondary" @click="deleteRoutine()" >Delete</button>
-              <button type="button" class="btn btn-primary" @click="updateRoutine()">Update</button>
-            </div>
-            <button v-else type="button" class="btn btn-primary" @click="createNewRoutine()">Create</button>
-          </div>
-        </div>
+          
       </div>
     </div>
-  </div>
-
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-    crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-    crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-    crossorigin="anonymous"></script>
-  <script src="vue.js"></script>
-  <script src="app.js"></script>
-</body>
-
+      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+      <script src="vue.js"></script>
+      <script src="app.js"></script>
+  </body>
 </html>
