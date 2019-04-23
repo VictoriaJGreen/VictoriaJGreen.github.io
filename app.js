@@ -1,4 +1,5 @@
-const socket = new WebSocket('wss://websockethangman.herokuapp.com/');
+const socket = new WebSocket('ws://localhost:8080');
+// const socket = new WebSocket('wss://websockethangman.herokuapp.com/');
 
 // socket.onmessage = function (event) {
 //   var received = event.data;
@@ -80,6 +81,10 @@ var app = new Vue({
         this.playerOnesTurn = !this.playerOnesTurn;
       },
       guessLetter() {
+        if (!this.magicWord) {
+          alert("You need a pal.");
+          return;
+        }
         if (this.assignedPlayer == "playerOne" && this.playerOnesTurn == true){
           var letterData = {
             type: "letterGuess",
@@ -101,7 +106,7 @@ var app = new Vue({
         }
       },
       reset() {
-        socket.send("reset");
+        socket.send(JSON.stringify({ type: "reset" }));
       }
     },
   created() {
