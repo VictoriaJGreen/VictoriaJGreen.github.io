@@ -137,25 +137,25 @@ var app = new Vue({
         } else if (data.activePlayer.activePlayer == playerTwo){
           this.playerOnesTurn = true;
         }
-      } else if (data.type == "reset"){
-        this.assignedPlayer = null;
-        this.playerOnesTurn = true;
-        this.letterOne = null;
-        this.letterTwo = null;
-        this.letterThree = null;
-        this.letterFour = null;
-        this.letterFive = null;
-        this.letterSix = null;
-        this.turns = 6;
-        this.correctGuessCount = 0;
-        this.guess = null;
-        this.announcedGuess = null;
-        this.magicWord = null;
       }
     }
 
     socket.onclose = e => {
       console.log('Closing socket due to: ', e.reason);
+      this.assignedPlayer = null;
+      this.playerOnesTurn = true;
+      this.letterOne = null;
+      this.letterTwo = null;
+      this.letterThree = null;
+      this.letterFour = null;
+      this.letterFive = null;
+      this.letterSix = null;
+      this.turns = 6;
+      this.correctGuessCount = 0;
+      this.guess = null;
+      this.announcedGuess = null;
+      this.magicWord = null;
+      socket = null;
     }
   }
 });
